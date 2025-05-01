@@ -1,14 +1,20 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-// context/CultContext.tsx
-import { v4 as uuidv4 } from 'uuid';
+import { api } from '@/lib/api';
 
 export type CultData = {
   id: string;
   name: string;
+  theme: string;
   manifesto: string;
   rituals: string[];
+  _count?: {
+    members: number;
+    comments: number;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type CultContextType = {
@@ -16,7 +22,10 @@ type CultContextType = {
   setTheme: (t: string) => void;
   cults: CultData[];
   loading: boolean;
-  generateCult: () => void;
+  error: string | null;
+  generateCult: () => Promise<void>;
+  fetchCults: (search?: string, theme?: string) => Promise<void>;
+  getCultById: (id: string) => Promise<CultData | null>;
 };
 
 const CultContext = createContext<CultContextType | undefined>(undefined);
@@ -33,31 +42,46 @@ export function CultProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState('');
   const [cults, setCults] = useState<CultData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('ziChaos.cults');
-    if (stored) {
-      try {
-        setCults(JSON.parse(stored));
-      } catch (e) {
-        console.error('Failed to parse cults from localStorage:', e);
-      }
-    }
-  }, []);
-
-  // Save to localStorage when cults change
-  useEffect(() => {
-    localStorage.setItem('ziChaos.cults', JSON.stringify(cults));
-  }, [cults]);
-
-  const generateCult = () => {
+  const fetchCults = async (search?: string, themeFilter?: string) => {
     setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (themeFilter) params.append('theme', themeFilter);
+      
+      const { data } = await api.get(`/cults?${params.toString()}`);
+      setCults(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch cults');
+      console.error('Error fetching cults:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setTimeout(() => {
-      const newCult: CultData = {
-        id: uuidv4(),
+  const getCultById = async (id: string): Promise<CultData | null> => {
+    try {
+      const { data } = await api.get(`/cults/${id}`);
+      return data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch cult');
+      console.error('Error fetching cult:', err);
+      return null;
+    }
+  };
+
+  const generateCult = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const cultData = {
         name: `${theme} Collective`,
+        theme,
         manifesto: `We are the ${theme} believers. Our truth is absolute.`,
         rituals: [
           `Daily chant of '${theme}' at 3:33am.`,
@@ -66,14 +90,35 @@ export function CultProvider({ children }: { children: ReactNode }) {
         ],
       };
 
-      setCults((prev) => [...prev, newCult]);
+      const { data } = await api.post('/cults', cultData);
+      setCults((prev) => [...prev, data]);
+      return data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to create cult');
+      console.error('Error creating cult:', err);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
+
+  // Load initial cults
+  useEffect(() => {
+    fetchCults();
+  }, []);
 
   return (
     <CultContext.Provider
-      value={{ theme, setTheme, cults, loading, generateCult }}
+      value={{ 
+        theme, 
+        setTheme, 
+        cults, 
+        loading, 
+        error,
+        generateCult,
+        fetchCults,
+        getCultById
+      }}
     >
       {children}
     </CultContext.Provider>
