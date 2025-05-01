@@ -26,6 +26,7 @@ interface PostContextType {
   deletePost: (postId: string) => Promise<void>;
   loading: boolean;
   error: string | null;
+  getPost: (postId: string) => Promise<Post>;
 }
 
 const PostContext = createContext<PostContextType | null>(null);
@@ -105,6 +106,20 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const getPost = async (postId: string) => {
+    setLoading(true);
+    try {
+      const { data } = await api.get(`/post/${postId}`);
+      return data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch post');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <PostContext.Provider value={{ 
       createPost, 
@@ -113,7 +128,8 @@ export function PostProvider({ children }: { children: React.ReactNode }) {
       updatePost, 
       deletePost, 
       loading, 
-      error 
+      error ,
+      getPost 
     }}>
       {children}
     </PostContext.Provider>

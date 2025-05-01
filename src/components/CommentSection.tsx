@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth.context';
 import { useComments } from '@/contexts/CommentContext';
 import { Button } from '@/components/ui/button';
@@ -9,42 +11,31 @@ import { Comment } from './Comment';
 import type { Comment as CommentType } from '@/contexts/CommentContext';
 
 interface CommentSectionProps {
-  cultId: string;
-  initialComments: CommentType[];
+  postId: string;
 }
 
-export function CommentSection({ cultId, initialComments }: CommentSectionProps) {
+export function CommentSection({ postId }: CommentSectionProps) {
   const { user } = useAuth();
-  const { addComment, loading } = useComments();
-  const [comments, setComments] = useState(initialComments);
+  const { addComment, getPostComments, loading } = useComments();
+  const [comments, setComments] = useState<CommentType[]>([]);
   const [content, setContent] = useState('');
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    getPostComments(postId).then(setComments);
+  }, [postId, getPostComments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
 
     try {
-      await addComment(cultId, content);
-      // Refresh comments or add optimistically
-      setComments([
-        {
-          id: Date.now().toString(),
-          content,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          userId: user!.id,
-          cultId,
-          user: {
-            id: user!.id,
-            username: user!.username,
-          },
-        },
-        ...comments,
-      ]);
+      await addComment(postId, content);
+      // Fetch fresh comments after successful addition
+      const updatedComments = await getPostComments(postId);
+      setComments(updatedComments);
       setContent('');
       setError('');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setError('Failed to post comment');
     }

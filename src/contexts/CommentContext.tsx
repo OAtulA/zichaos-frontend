@@ -17,8 +17,9 @@ export type Comment = {
 };
 
 type CommentContextType = {
-  addComment: (cultId: string, content: string) => Promise<void>;
+  addComment: (postId: string, content: string) => Promise<void>;
   deleteComment: (commentId: string) => Promise<void>;
+  getPostComments: (postId: string) => Promise<Comment[]>;
   loading: boolean;
   error: string | null;
 };
@@ -37,14 +38,29 @@ export function CommentProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const addComment = async (cultId: string, content: string) => {
+  const addComment = async (postId: string, content: string) => {
     setLoading(true);
     setError(null);
     try {
-      await api.post(`/cults/${cultId}/comments`, { content });
+      await api.post('/comments', { postId, content });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to add comment');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getPostComments = async (postId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.get(`/comments/post/${postId}`);
+      return data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch comments');
       throw err;
     } finally {
       setLoading(false);
@@ -66,14 +82,13 @@ export function CommentProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CommentContext.Provider
-      value={{
-        addComment,
-        deleteComment,
-        loading,
-        error,
-      }}
-    >
+    <CommentContext.Provider value={{ 
+      addComment, 
+      deleteComment,
+      getPostComments,
+      loading, 
+      error 
+    }}>
       {children}
     </CommentContext.Provider>
   );
