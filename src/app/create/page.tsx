@@ -48,7 +48,7 @@ export default function CreateCultPage() {
           placeholder="e.g. Flat Code Society, Moon Bouncers"
           value={theme}
           onChange={(e) => setTheme(e.target.value)}
-          className="text-black"
+          className="text-white"
         />
 
         <Button onClick={generateCult} disabled={!theme || loading} className="w-full">
