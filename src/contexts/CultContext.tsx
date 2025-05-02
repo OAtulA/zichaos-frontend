@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { api } from '@/lib/api';
+import toast, { Toaster } from 'react-hot-toast';
 
 export type CultData = {
   id: string;
@@ -26,6 +27,7 @@ type CultContextType = {
   generateCult: () => Promise<void>;
   fetchCults: (search?: string, theme?: string) => Promise<void>;
   getCultById: (id: string) => Promise<CultData | null>;
+  createCult: (cultData: Omit<CultData, 'id'>) => Promise<void>;
 };
 
 const CultContext = createContext<CultContextType | undefined>(undefined);
@@ -92,6 +94,10 @@ export function CultProvider({ children }: { children: ReactNode }) {
 
       const { data } = await api.post('/cults', cultData);
       setCults((prev) => [...prev, data]);
+      if(data){
+       toast.success('Cult created successfully!');        
+      }
+
       return data;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
@@ -102,10 +108,28 @@ export function CultProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Load initial cults
-  useEffect(() => {
-    fetchCults();
-  }, []);
+  const createCult = async (cultData: Omit<CultData, 'id'>) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.post('/cults', cultData);
+      setCults((prev) => [...prev, data]);  
+      
+      if(data){
+        toast.success('Cult created successfully!');
+        console.log('Cult created:', data);
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to create cult');
+      console.error('Error creating cult:', err);
+      toast.error(err.response?.data?.message || 'Failed to create cult');
+      throw err;
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <CultContext.Provider
@@ -117,9 +141,11 @@ export function CultProvider({ children }: { children: ReactNode }) {
         error,
         generateCult,
         fetchCults,
-        getCultById
+        getCultById,
+        createCult
       }}
     >
+      <Toaster position='bottom-right' />
       {children}
     </CultContext.Provider>
   );

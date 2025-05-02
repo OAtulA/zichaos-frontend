@@ -1,8 +1,9 @@
 'use client';
 
-import { useCult } from '@/context/CultContext';
+
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useCult } from '@/contexts/CultContext';
 
 export default function CultDetailPage() {
   const { cults } = useCult();
@@ -24,7 +25,7 @@ export default function CultDetailPage() {
       <section className="max-w-3xl w-full space-y-8">
         <h1 className="text-3xl font-bold text-purple-400 text-center">🌌 All Cults</h1>
 
-        {cults.map((cult, index) => (
+        {cults.map((cult) => (
           <div key={cult.id} className="bg-zinc-900 p-6 rounded-xl space-y-4">
             <h2 className="text-2xl font-semibold text-purple-300">{cult.name}</h2>
             <div>

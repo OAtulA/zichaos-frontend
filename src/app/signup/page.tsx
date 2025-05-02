@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 
 export default function SignupPage() {
-  const router = useRouter();
+  // const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -17,6 +17,7 @@ export default function SignupPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -28,6 +29,7 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
@@ -41,9 +43,8 @@ export default function SignupPage() {
         username: formData.username,
         password: formData.password,
       });
-      router.push('/login');
-    } 
-    catch (err: Error | unknown) {
+      setSuccessMessage('Please check your email for verification instructions');
+    } catch (err: Error | unknown) {
       setError(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ((err as any).response?.data?.message as string) || 'Failed to create account'
@@ -71,8 +72,14 @@ export default function SignupPage() {
           </div>
         )}
 
+        {successMessage && (
+          <div className="bg-green-500/10 border border-green-500 text-green-500 px-4 py-2 rounded">
+            {successMessage}
+          </div>
+        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+          <div className="space-y-4 [&>input]:text-white">
             <Input
               name="email"
               type="email"

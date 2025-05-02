@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCult } from '@/context/CultContext';
 import { Button } from '@/components/ui/button';
+import { useCult } from '@/contexts/CultContext';
 
 export default function PublishCultPage() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export default function PublishCultPage() {
     return (
       <main className="min-h-screen bg-zinc-950 text-white p-6 flex flex-col items-center justify-center">
         <p className="text-gray-400 text-lg">No cult data to publish. Please create a cult first.</p>
-        <Button className="mt-4" onClick={() => router.push('/create')}>
+        <Button className="mt-4" onClick={() => router.push('/create/cult')}>
           Create a Cult
         </Button>
       </main>

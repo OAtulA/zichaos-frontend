@@ -16,7 +16,7 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link href="/create">
+          <Link href="/create/cult">
             <Button className="bg-purple-600 hover:bg-purple-700 text-white text-lg">
               Create a Cult
             </Button>
@@ -26,7 +26,7 @@ export default function HomePage() {
               Browse Cults
             </Button>
           </Link>
-          <Link href="/login">
+          <Link href="/signup">
             <Button variant="ghost" className="text-sm text-gray-400 hover:text-purple-400 mt-2 sm:mt-0">
               Enter as Burner →
             </Button>
