@@ -1,33 +1,25 @@
-'use client';
+"use client";
 
-
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { useCult } from '@/contexts/CultContext';
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { useCult } from "@/contexts/cultContext";
 
 export default function CultDetailPage() {
   const { cults } = useCult();
   const router = useRouter();
 
-  if (cults.length === 0) {
-    return (
-      <main className="min-h-screen flex items-center justify-center text-white bg-zinc-950">
-        <div className="text-center space-y-4">
-          <p className="text-lg">No cults found.</p>
-          <Button onClick={() => router.push('/create')}>Create a Cult</Button>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-zinc-950 text-white p-6 flex flex-col items-center">
       <section className="max-w-3xl w-full space-y-8">
-        <h1 className="text-3xl font-bold text-purple-400 text-center">🌌 All Cults</h1>
+        <h1 className="text-3xl font-bold text-purple-400 text-center">
+          🌌 All Cults
+        </h1>
 
         {cults.map((cult) => (
           <div key={cult.id} className="bg-zinc-900 p-6 rounded-xl space-y-4">
-            <h2 className="text-2xl font-semibold text-purple-300">{cult.name}</h2>
+            <h2 className="text-2xl font-semibold text-purple-300">
+              {cult.name}
+            </h2>
             <div>
               <h3 className="font-bold text-lg">📜 Manifesto</h3>
               <p className="text-gray-300">{cult.manifesto}</p>
