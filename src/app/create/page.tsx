@@ -81,13 +81,8 @@ export default function CreateCultPage() {
   );
 }
 
-
-// 📍You’ll Also Need:
-
-// POST /api/generate-cult API route
-
-// It uses Gemini/OpenAI to return name, manifesto, rituals
-
-// UI components: Button, Input, Textarea (if using shadcn/ui)
-
-// Optional: Save to DB with Prisma in the “Publish” step
+/*You’ll Also Need:
+POST /api/generate-cult API route
+It uses Gemini/OpenAI to return name, manifesto, rituals
+UI components: Button, Input, Textarea (if using shadcn/ui)
+Optional: Save to DB with Prisma in the “Publish” step*/
